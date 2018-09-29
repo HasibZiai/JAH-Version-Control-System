@@ -85,4 +85,5 @@ Additional folders will be made according to the name of the files.
 
 Bugs
 ----
-The ostream createst a manifest.txt but it is empty during the first iteration. 
+The ostream creates a manifest.txt but it is empty during the first iteration. 
+The first entry of the manifest will be for manifest.txt, but it has no size or checksum.
