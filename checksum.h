@@ -1,11 +1,22 @@
+/*
+	Computer Science 362 - SWE Fundamentals - VCS Project #1
+	Team Name: JAH
+	Authors :
+		Aaron Gumabong - aarongumabong@gmail.com
+		Joe Vanacore - joevanacore@gmail.com
+		Hasib Ziai - hasibziai@csu.fullerton.edu
+
+	Description: This header function takes in a file and converts it into a weighted checksum of the characters in the
+			file. Returns a string that is a converted checksum version of the original file name. Additionally, returns the contents
+			of the original files to be output to Artifacts.
+
+*/
+
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <experimental/filesystem>
-//#include <filesystem>
-
-//Takes in a file and converts it into a weighted checksum of the characters in the
-//file. Returns a string that is a converted checksum version of the original file name.
+#include <ctime>
 
 
 namespace fs = std::experimental::filesystem;
@@ -14,13 +25,13 @@ namespace fs = std::experimental::filesystem;
 
 std::string checksum(fs::path file_path)
 {
-	
+
 	//ifstream to take in the file
 	std::ifstream ifs(file_path);
 	//Reads all of the input of the string
 	std::string content((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
 	//Prints out the contents of the file
-	std::cout << "Contents of the text file are: " << content << std::endl;
+	//std::cout << "Contents of the text file are: " << content << std::endl;
 
 	//Holds the eventual checksum filename
 	std::string file_name;
@@ -60,7 +71,7 @@ std::string checksum(fs::path file_path)
 	//Uses modulo on the number to cut down on number size
 	file_name = std::to_string(checksum % 2147483647);
 	//Adds -L to the end of the file
-	file_name += "-L";	
+	file_name += "-L";
 	//converts the size of the file into a string and then adds it to the file name
 	std::string size = std::to_string(fs::file_size(file_path));
 	std::cout << "Size of the file is: " << size << std::endl;
@@ -80,4 +91,3 @@ std::string text_content(fs::path file_path)
 
 	return content;
 }
-
