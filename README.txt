@@ -86,4 +86,6 @@ Additional folders will be made according to the name of the files.
 Bugs
 ----
 The ostream creates a manifest.txt but it is empty during the first iteration. 
-The first entry of the manifest will be for manifest.txt, but it has no size or checksum.
+On 2nd pass to delete remnant text files, manifest.txt may be in different arrays
+of the path vector, which will then throw an error as the program cannot find the
+file at the specified path.
