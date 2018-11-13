@@ -1,15 +1,15 @@
 /*
-	Computer Science 362 - SWE Fundamentals - VCS Project #1
-	Team Name: JAH
-	Authors :
-		Aaron Gumabong - aarongumabong@gmail.com
-		Joe Vanacore - joevanacore@gmail.com
-		Hasib Ziai - hasibziai@csu.fullerton.edu
+Computer Science 362 - SWE Fundamentals - VCS Project #1
+Team Name: JAH
+Authors :
+Aaron Gumabong - aarongumabong@gmail.com
+Joe Vanacore - joevanacore@gmail.com
+Hasib Ziai - hasibziai@csu.fullerton.edu
 
-	Description: This program, that requires no initial invocation or function calls, executes from main to create a repository for a Version Control System.
-					Refactor to function call createRepo is possible. User will be prompted to enter a source path, containing files and their associated directories
-					along with the target path; the directory where the repository will be created. This program assumes all of the project guideline assumptions, but 
-					we have created some directory exist checks for sanity. 
+Description: This program, that requires no initial invocation or function calls, executes from main to create a repository for a Version Control System.
+Refactor to function call createRepo is possible. User will be prompted to enter a source path, containing files and their associated directories
+along with the target path; the directory where the repository will be created. This program assumes all of the project guideline assumptions, but
+we have created some directory exist checks for sanity.
 */
 
 
@@ -21,6 +21,7 @@
 #include <ctime>
 
 #include "checksum.h"
+#include "checkout.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -34,24 +35,24 @@ void create_repo()
 
 	std::getline(std::cin, sourcePath);											//get sourcePath, includes whitespace for Windows paths
 
-	/*
-	if (!fs::is_directory(sourcePath)) {
-		std::cout << "Not a valid path \n";
-		return 1;
-	}
-	*/
+																				/*
+																				if (!fs::is_directory(sourcePath)) {
+																				std::cout << "Not a valid path \n";
+																				return 1;
+																				}
+																				*/
 
 	std::cout << "Now enter the target path you want to create your repo: \n";
 
 	std::getline(std::cin, targetPath);											//get targetPath, includes whitespace for Windows paths
 
-	/*
-	if (!fs::is_directory(targetPath)) {
-		std::cout << "Target path does not exist. \n";
-		std::cout << "Creating directory. \n";
-		fs::create_directory(targetPath);
-	}
-	*/
+																				/*
+																				if (!fs::is_directory(targetPath)) {
+																				std::cout << "Target path does not exist. \n";
+																				std::cout << "Creating directory. \n";
+																				fs::create_directory(targetPath);
+																				}
+																				*/
 
 	time_t current_time = time(NULL);
 	//array to take in the system time and date
@@ -64,7 +65,9 @@ void create_repo()
 
 	int regular_files = 0;
 	int n = 0;
+	
 	// Main code for copying files and directories along with all related subdirectories
+	/*
 	try {
 		fs::copy(sourcePath, targetPath, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
 	}
@@ -73,6 +76,7 @@ void create_repo()
 		std::cout << e.what() << '\n';
 		system("pause");
 	}
+	*/
 	// Holds copies of the above files and subdirectories
 	// Overwrites existing files while adding newly added ones
 
@@ -151,26 +155,26 @@ void create_repo()
 	fs::remove_all(targetPath + "/manifest");
 
 	// Create iterator to go through target folder and delete original files that were copied.
-		for (int i = 0; i < full_filename.size(); i++)
+	for (int i = 0; i < full_filename.size(); i++)
+	{
+		try
 		{
-			try
+			/* In our design, manifest.txt is added  in full_filename vector but since the fs::remove function
+			cannot find manifest.txt within the current directory, it will print an error. This if statement is a
+			rudimentary workaround.
+			*/
+			if (full_filename[i].string() == "manifest.txt")
 			{
-				/* In our design, manifest.txt is added  in full_filename vector but since the fs::remove function
-					cannot find manifest.txt within the current directory, it will print an error. This if statement is a 
-					rudimentary workaround.
-				*/
-				if (full_filename[i].string() == "manifest.txt")
-				{
-					i++;
-				}
-				fs::remove(paths[i] / full_filename[i]);
+				i++;
 			}
-			catch (fs::filesystem_error &p)
-			{
-				std::cout << p.what() << "\n";
-			}
-			
+			fs::remove(paths[i] / full_filename[i]);
 		}
+		catch (fs::filesystem_error &p)
+		{
+			std::cout << p.what() << "\n";
+		}
+
+	}
 
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest.txt file)." << "\n";
 	std::cout.rdbuf(backup);
@@ -201,9 +205,17 @@ void label() {
 
 int main() {
 
-
-	label();
+	std::string copy_path;
+	std::string copy_source;
+	//label();
 	//create_repo();
+
+	std::cout << "Please enter a file path to copy: ";
+	std::getline(std::cin, copy_source);
+	std::cout << "Please enter the path for the file to be copied to: ";
+	std::getline(std::cin, copy_path);
+
+	check_out(copy_source, copy_path);
 
 	return 0;
 }
