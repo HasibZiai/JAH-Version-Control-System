@@ -25,7 +25,7 @@
 namespace fs = std::experimental::filesystem;
 
 
-int main()
+void create_repo()
 {
 	std::string sourcePath;
 	std::string targetPath;
@@ -83,29 +83,23 @@ int main()
 
 	std::vector<fs::path> full_filename;
 
-	//Create a manifest file in targetPath directory
+	//Create a manifest file
 	std::streambuf *psbuf, *backup;
-	
 	std::ofstream fileManifest(targetPath);
 	fileManifest.open(targetPath += "\\manifest.txt", std::ofstream::trunc);
 
-	//Save current position of read buffer in backup
 	backup = std::cout.rdbuf();
 
 	psbuf = fileManifest.rdbuf();
-	
-	//Redirects stdout into manifest file
 	std::cout.rdbuf(psbuf);
 
-	//removes /manifest.txt from target path
+
 	targetPath = targetPath.substr(0, targetPath.size() - 13);
 
 
 	fileManifest << "The source path entered was: " << sourcePath << "\n";
-	fileManifest << "The target path entered was: " << targetPath << "\n\n";
+	fileManifest << "The target path entered was: " << targetPath << "\n\n\n\n";
 
-	// Printout out the timestamp
-	std::cout << "The current date and time is: " << timeStr << "\n\n";
 
 	// For loop that recursively iterates through all folders/sub-folders searching for files
 	try {
@@ -142,7 +136,8 @@ int main()
 
 				std::cout << "The relative path is: " << fs::path(p).relative_path() << "\n\n\n";
 
-
+				// Close ofstream to prevent memory leak
+				outfile.close();
 				n++;
 			}
 	}
@@ -156,35 +151,59 @@ int main()
 	fs::remove_all(targetPath + "/manifest");
 
 	// Create iterator to go through target folder and delete original files that were copied.
-	for (int i = 0; i < full_filename.size(); i++)
-	{
-		try
+		for (int i = 0; i < full_filename.size(); i++)
 		{
-			/* In our design, manifest.txt is added  in full_filename vector but since the fs::remove function
-				cannot find manifest.txt within the current directory, it will print an error. This if statement is a
-				rudimentary workaround.
-			*/
-			if (full_filename[i].string() == "manifest.txt")
+			try
 			{
-				i++;
+				/* In our design, manifest.txt is added  in full_filename vector but since the fs::remove function
+					cannot find manifest.txt within the current directory, it will print an error. This if statement is a 
+					rudimentary workaround.
+				*/
+				if (full_filename[i].string() == "manifest.txt")
+				{
+					i++;
+				}
+				fs::remove(paths[i] / full_filename[i]);
 			}
-			fs::remove(paths[i] / full_filename[i]);
+			catch (fs::filesystem_error &p)
+			{
+				std::cout << p.what() << "\n";
+			}
+			
 		}
-		catch (fs::filesystem_error &p)
-		{
-			std::cout << p.what() << "\n";
-		}
-
-	}
 
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest.txt file)." << "\n";
-	
-	//returns read buffer to original position
 	std::cout.rdbuf(backup);
+
+	// Printout out the timestamp
+	std::cout << timeStr;
 
 	std::cout << "The operation is complete. Please check manifest file.\n";
 
-	std::cin.ignore();
+}
+
+void label() {
+
+	std::string manifest_folder;
+	std::string label;
+
+	std::cout << "Enter the repository root path to find manifest file: \n";
+	std::getline(std::cin, manifest_folder);
+	std::cout << "Enter your label: ";
+	std::getline(std::cin, label);
+
+	std::ofstream manifest_file(manifest_folder);
+	manifest_file.open(manifest_folder += "\\manifest.txt", std::ofstream::app);
+	manifest_file << label;
+	manifest_file.close();
+
+}
+
+int main() {
+
+
+	label();
+	//create_repo();
 
 	return 0;
 }
