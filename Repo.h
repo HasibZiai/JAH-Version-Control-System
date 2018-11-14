@@ -343,7 +343,7 @@ void check_in(std::string sourcePath, std::string targetPath) {
 	try {
 		for (auto& p : fs::recursive_directory_iterator(targetPath))
 			
-
+			//This iterator is useless, and will be reworked. 
 			for (auto& q : fs::recursive_directory_iterator(sourcePath))
 
 				// For every file that is a regular file...
