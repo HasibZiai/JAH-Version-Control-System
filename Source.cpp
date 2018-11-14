@@ -19,39 +19,16 @@
 #include <vector>
 #include <string>
 #include <ctime>
+#include <stdio.h>
 
 #include "checksum.h"
+#include "Label.h"
 
 namespace fs = std::experimental::filesystem;
 
 
-void create_repo()
+void create_repo(std::string sourcePath, std::string targetPath)
 {
-	std::string sourcePath;
-	std::string targetPath;
-
-	std::cout << "Please enter the source path you want to copy: \n";
-
-	std::getline(std::cin, sourcePath);											//get sourcePath, includes whitespace for Windows paths
-
-	/*
-	if (!fs::is_directory(sourcePath)) {
-		std::cout << "Not a valid path \n";
-		return 1;
-	}
-	*/
-
-	std::cout << "Now enter the target path you want to create your repo: \n";
-
-	std::getline(std::cin, targetPath);											//get targetPath, includes whitespace for Windows paths
-
-	/*
-	if (!fs::is_directory(targetPath)) {
-		std::cout << "Target path does not exist. \n";
-		std::cout << "Creating directory. \n";
-		fs::create_directory(targetPath);
-	}
-	*/
 
 	time_t current_time = time(NULL);
 	//array to take in the system time and date
@@ -182,28 +159,12 @@ void create_repo()
 
 }
 
-void label() {
 
-	std::string manifest_folder;
-	std::string label;
-
-	std::cout << "Enter the repository root path to find manifest file: \n";
-	std::getline(std::cin, manifest_folder);
-	std::cout << "Enter your label: ";
-	std::getline(std::cin, label);
-
-	std::ofstream manifest_file(manifest_folder);
-	manifest_file.open(manifest_folder += "\\manifest.txt", std::ofstream::app);
-	manifest_file << label;
-	manifest_file.close();
-
-}
 
 int main() {
 
-
-	label();
-	//create_repo();
-
+	label("mypt2_repo", "Fred");
+	//create_repo("mypt2", "mypt2_repo");
+	
 	return 0;
 }
