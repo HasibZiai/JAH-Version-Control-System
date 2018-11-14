@@ -76,7 +76,7 @@ int main() {
 			std::getline(std::cin, sPath);
 			std::cout << "Please enter the Target path:\n";
 			std::getline(std::cin, tPath);
-			check_in(sPath, tPath);
+			//check_in(sPath, tPath);
 			break;
 		default:
 			std::cout << "Quitting...\n";
