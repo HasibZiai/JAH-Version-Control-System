@@ -22,17 +22,19 @@ void check_out(std::string copy_path, std::string source_path, std::string label
 	std::string label2 = source_path + "\\" + label_name;
 	std::cout << label2 << std::endl;
 	
+	//check to see if the source path is the same as copy path because this will lead to a large error
 	if (source_path == copy_path)
 	{
 		std::cout << "Error, copied path cannot be the same as destination folder." << std::endl;
 	}
 	else
 	{
+		//copy the files to the target destination
 		fs::copy(copy_path, source_path, fs::copy_options::recursive);		
-
+		
 		std::ofstream fileManifest(source_path);
-		const char * label = label2.c_str();
-		//std::cout << label << std::endl;
+		const char * label = label2.c_str()
+		//rename the file 
 		bool rename_success = rename(sp2, label);
 		if (rename_success == true)
 		{
@@ -41,8 +43,7 @@ void check_out(std::string copy_path, std::string source_path, std::string label
 		else
 			std::cout << "Error in renaming file." << std::endl;
 		
-		label_name.insert(0, "\\");
-		//const char * label2 = label_name.c_str();
+		//Note when the file was created
 		fileManifest.open(label2, std::ofstream::trunc);
 		fileManifest << "File created at:" << timeStr;
 	
