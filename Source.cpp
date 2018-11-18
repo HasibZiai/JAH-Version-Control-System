@@ -58,7 +58,7 @@ int main() {
 			std::getline(std::cin, tempManPath);
 			std::cout << "Please enter the label you want to add:\n";
 			std::getline(std::cin, tempLabel);
-			//label(tempManPath, tempLabel)
+			label(tempManPath, tempLabel);
 			break;
 		case 3:
 			std::cout << "\n";
@@ -67,7 +67,9 @@ int main() {
 			std::getline(std::cin, sPath);
 			std::cout << "Please enter the Target path:\n";
 			std::getline(std::cin, tPath);
-			//check_out(sPath, tPath);
+			std::cout << "Please enter the Label name:\n";
+			std::getline(std::cin, tempLabel);
+			check_out(sPath, tPath, tempLabel);
 			break;
 		case 4:
 			std::cout << "\n";
@@ -76,7 +78,7 @@ int main() {
 			std::getline(std::cin, sPath);
 			std::cout << "Please enter the Target path:\n";
 			std::getline(std::cin, tPath);
-			//check_in(sPath, tPath);
+			check_in(sPath, tPath);
 			break;
 		default:
 			std::cout << "Quitting...\n";
