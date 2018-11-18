@@ -206,7 +206,7 @@ void create_repo(std::string sourcePath, std::string targetPath)
 	}
 	regular_files++;
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest file)." << "\n";
-
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 
 	std::cout.rdbuf(backup);
@@ -251,23 +251,66 @@ void label(std::string manifest_path, std::string label_name) {
 	system("pause");
 }
 
-void check_out(std::string copy_path, std::string source_path)
+void check_out(std::string s_path, std::string source_path, std::string label)
 {
 	time_t current_time = time(NULL);
 	char timeStr[26];
 	char cur_time = ctime_s(timeStr, sizeof timeStr, &current_time);
-	
-	if (source_path == copy_path)
+	std::string label_name;
+	std::string sp = source_path + "\\manifest.txt";
+
+	if (source_path == s_path)
 	{
-		std::cout << "Error copied path cannot be the same as destination folder." << std::endl;
+		std::cout << "Error, copied path cannot be the same as destination folder." << std::endl;
 	}
 	else
 	{
-		fs::copy(copy_path, source_path, fs::copy_options::recursive);		
-		std::ofstream fileManifest(source_path);
-		fileManifest.open(source_path += "\\manifest.txt", std::ofstream::trunc);
-		fileManifest << "File created at:" << timeStr;
-		
+		fs::recursive_directory_iterator iter(s_path);
+		fs::recursive_directory_iterator end;
+		std::fstream file;
+		std::string line;
+		std::string c_label;
+		//iterates through the whole filesystem and looks for all manifest files
+		while (iter != end)
+		{
+			std::string p = iter->path().string();
+			//if a file is the manifest it will open it and check what the label says
+			if (p.substr(p.size() - 12, 12) == "manifest.txt")
+			{
+				std::ifstream f(p);
+				if (f.is_open() == false)
+				{
+					std::cout << "Failed to open file." << std::endl;
+				}
+				while (std::getline(f, line))
+				{
+					std::getline(f, line);
+					std::cout << line.substr(0, 5) << std::endl;
+					//stores the line that says label
+					if (line.substr(0, 6) == "Label:")
+					{
+						c_label = line.substr(7, line.size() - 1);
+					}
+				}
+				f.close();
+				//if the labels match copy the file path to the folder
+				if (c_label == label)
+				{
+					fs::copy(iter->path().parent_path(), source_path, fs::copy_options::recursive);
+				}
+
+			}
+			iter.operator++();
+		}
+
+		//std::ofstream fileManifest(source_path);
+		//std::cout << label << std::endl;
+		//label_name.insert(0, "\\");
+		//const char * label2 = label_name.c_str();
+		//fileManifest.open(label2, std::ofstream::trunc);
+		//fileManifest << "File created at:" << timeStr;
+
+
 		std::cout << "Successfully copied file path." << std::endl;
 	}
 }
@@ -284,29 +327,8 @@ void check_in(std::string sourcePath, std::string targetPath) {
 	char cur_time = ctime_s(timeStr, sizeof timeStr, &current_time);
 
 
-	// In this example we have two text files in a folder "mypt" within the source folder.
-	// This code will copy contents of "mypt" to target folder "mypt_repo".
-
 	int regular_files = 0;
 	int n = 0;
-
-
-	//************************************************************************************************************************************************
-	//Since we are not creating a new Repo, I don't think I should be copying over the whole folder.
-	//I think this is where I'm getting confused, should I be just comparing what files are different in each folder before copying...
-	//Or storing all of the paths from SourcePath, and only copying over the files that we need, and including those changes in the check_in_manifest?
-	//************************************************************************************************************************************************
-
-	/*// Main code for copying files and directories along with all related subdirectories
-	try {
-		fs::copy(sourcePath, targetPath, fs::copy_options::recursive | fs::copy_options::overwrite_existing);
-	}
-	catch (fs::filesystem_error& e)
-	{
-		std::cout << e.what() << '\n';
-		system("pause");
-	}
-	*/
 
 	// Holds copies of the above files and subdirectories
 	// Overwrites existing files while adding newly added ones
@@ -318,19 +340,25 @@ void check_in(std::string sourcePath, std::string targetPath) {
 
 	std::vector<fs::path> full_filename;
 
-	//Create a manifest file
+	//Open the manifest file
 	std::streambuf *psbuf, *backup;
-	std::ofstream fileManifest(targetPath);
-	fileManifest.open(targetPath += "\\check_in_manifest.txt", std::ofstream::trunc);
+	std::ofstream fileManifest;
 
+	fileManifest.open(targetPath += "\\manifest.txt", std::ios_base::app);
+
+	//std::ofstream fileManifest(targetPath);
+	//fileManifest.open(targetPath += "\\check_in_manifest.txt", std::ofstream::trunc);
+
+	//redirecting std::out to file
 	backup = std::cout.rdbuf();
 
 	psbuf = fileManifest.rdbuf();
 	std::cout.rdbuf(psbuf);
 
-
+	//removing "\manifest.txt" for output in manifest
 	targetPath = targetPath.substr(0, targetPath.size() - 13);
 
+	fileManifest << "\n";
 	fileManifest << "Check In\n";
 	// Printout out the timestamp
 	std::cout << timeStr << "\n";
@@ -342,49 +370,139 @@ void check_in(std::string sourcePath, std::string targetPath) {
 	// For loop that recursively iterates through all folders/sub-folders searching for files
 	try {
 		for (auto& p : fs::recursive_directory_iterator(targetPath))
-			
-			//This iterator is useless, and will be reworked. 
-			for (auto& q : fs::recursive_directory_iterator(sourcePath))
 
-				// For every file that is a regular file...
-				if (fs::is_regular_file(p))
-				{
-					if (fs::path(p).filename() == fs::path(q).filename()) {
-						regular_files++;
+			// For every file that is a regular file...
+			if (fs::is_regular_file(p))
+			{
+				//std::cout << "Is the target file a regular file?\n";
+				for (auto& sourceFile : fs::recursive_directory_iterator(sourcePath)) {
+					if (fs::is_regular_file(sourceFile)) {
+						//std::cout << "Is sourceFile a regular file?\n";
+						//std::cout << "Parent path: " << fs::path(p).parent_path() << "\n";
+						//std::cout << "Relative path: " << fs::path(p).relative_path() << "\n";
+
+						//Check if current directory in Target is the same as current directory in Source
+						std::string targetParentDir = fs::path(p).parent_path().string();
+						std::string sourceParentDir = fs::path(sourceFile).parent_path().string();
+
+						//Get Parent Directory by removing Target Path
+						std::string::size_type i = targetParentDir.find(targetPath);
+						if (i != std::string::npos) {
+							targetParentDir.erase(i, targetPath.length());
+						}
+
+						//Get Parent Directory by removing Source Path
+						std::string::size_type j = sourceParentDir.find(sourcePath);
+						if (j != std::string::npos) {
+							sourceParentDir.erase(j, sourcePath.length());
+						}
+
+						if (targetParentDir == sourceParentDir) {
+							
+							//Comments below are for debugging purposes only
+
+							//std::cout << "Is the parent path of target the same as source?\n";
+							//std::cout << "Target Parent directory: " << targetParentDir << "\n";
+							//std::cout << "Source parent directory: " << sourceParentDir << "\n";
+
+
+							for (auto& q : fs::directory_iterator(fs::path(p).parent_path())) {
+								for (auto& r : fs::directory_iterator(fs::path(sourceFile).parent_path())) {
+
+									//Comments below are for debugging purposes only
+
+									//std::cout << "Current relative path of target: " << fs::path(q).parent_path() << "\n";
+									//std::cout << "Current relative path of source: " << fs::path(r).parent_path() << "\n";
+
+									//If both files are regular files...
+									if (fs::is_regular_file(q) && fs::is_regular_file(r)) {
+
+										//If both filenames are the same, and not equal to "manifest.txt"...
+										if (fs::path(q).filename() == fs::path(r).filename() && fs::path(q).filename().string() != "manifest.txt") {
+											
+											//Comments are for debugging purposes only
+											
+											//std::cout << "Are the file names the same?\n";
+											//std::cout << "Target filename: " << fs::path(p).filename() << "\n";
+											//std::cout << "Source filename: " << fs::path(sourceFile).filename() << "\n";
+											
+											//Incrementing the iterator does not seem to work using the current implementation.
+											//q& operator++();						Does not work
+											//directory_iterator& operator++();		Does not work
+											//q& increment(std::error_code& ec);	Does not work
+											//directory_iterator& operator++();		Does not work
+
+											//increment matching files, do not copy or overwrite in Source repo
+											regular_files++;
+											goto cnt;
+
+										}
+									cnt:;
+										//If filenames are not equal inside the directory...
+										if (fs::path(q).filename() != fs::path(r).filename()) {
+											
+											//Comments are for debugging purposes only
+
+											//std::cout << "Are the file names different?\n";
+											//std::cout << "Target filename: " << fs::path(q).filename() << "\n";
+											//std::cout << "Source filename: " << fs::path(r).filename() << "\n";
+
+
+
+											//If files in directories are named differently, then copy files from source Repo to target Repo and apply operations
+											
+											//This part is currently nonfunctional due to iterator not being able to be incremented
+											//This would copy over the file pointed to by sourceFile
+
+											/*
+											// Increment counter for # of files within repo
+											regular_files++;
+
+											// Created vector paths to store paths to regular files into
+											paths.push_back(fs::path(sourceFile).parent_path());
+
+											// Created vector filenames without extension to hold names of files within subfolders for Checksum calculation
+											filenames.push_back(fs::path(sourceFile).stem());
+
+											// Created vector that contains the name of the file being copied along with its extension
+											full_filename.push_back(fs::path(sourceFile).filename());
+
+											// Create directories and subdirectories
+											fs::create_directories(paths[n] / filenames[n]);
+
+											// Iterate through folders and find the checksum values of all text files found
+											checksum_value = checksum(fs::path(sourceFile));
+
+											// Push all artifact directories that will be created into a vector
+											artifact_path.push_back(paths[n] / filenames[n] / checksum_value += ".txt");
+
+											// Create new text files using artifact directories found above by iteration
+											std::ofstream outfile(artifact_path[n]);
+
+											// Writing the contents of the original files to the Artifact files
+											outfile << text_content(fs::path(sourceFile));
+
+											std::cout << "The relative path is: " << fs::path(sourceFile).relative_path() << "\n\n\n";
+
+											// Close ofstream to prevent memory leak
+											outfile.close();
+											n++;
+											*/
+										}
+										else {
+											//For debugging purposes only
+											//std::cout << "Error, neither true nor false\n";
+										}
+									}
+
+								}
+							}
+
+						}
+
 					}
-					// Increment counter for # of files within repo
-					regular_files++;
-
-					// Created vector paths to store paths to regular files into
-					paths.push_back(fs::path(p).parent_path());
-
-					// Created vector filenames without extension to hold names of files within subfolders for Checksum calculation
-					filenames.push_back(fs::path(p).stem());
-
-					// Created vector that contains the name of the file being copied along with its extension
-					full_filename.push_back(fs::path(p).filename());
-
-					// Create directories and subdirectories
-					fs::create_directories(paths[n] / filenames[n]);
-
-					// Iterate through folders and find the checksum values of all text files found
-					checksum_value = checksum(fs::path(p));
-
-					// Push all artifact directories that will be created into a vector
-					artifact_path.push_back(paths[n] / filenames[n] / checksum_value += ".txt");
-
-					// Create new text files using artifact directories found above by iteration
-					std::ofstream outfile(artifact_path[n]);
-
-					// Writing the contents of the original files to the Artifact files
-					outfile << text_content(fs::path(p));
-
-					std::cout << "The relative path is: " << fs::path(p).relative_path() << "\n\n\n";
-
-					// Close ofstream to prevent memory leak
-					outfile.close();
-					n++;
 				}
+			}
 	}
 	catch (fs::filesystem_error& e)
 	{
@@ -393,7 +511,7 @@ void check_in(std::string sourcePath, std::string targetPath) {
 	}
 
 	// Cleanup leftover artifact creation of manifest text file.
-	fs::remove_all(targetPath + "/check_in_manifest");
+	fs::remove_all(targetPath + "/manifest");
 
 	// Create iterator to go through target folder and delete original files that were copied.
 	for (int i = 0; i < full_filename.size(); i++)
@@ -404,7 +522,7 @@ void check_in(std::string sourcePath, std::string targetPath) {
 				cannot find manifest.txt within the current directory, it will print an error. This if statement is a
 				rudimentary workaround.
 			*/
-			if (full_filename[i].string() == "check_in_manifest.txt")
+			if (full_filename[i].string() == "manifest.txt")
 			{
 				i++;
 			}
@@ -418,7 +536,7 @@ void check_in(std::string sourcePath, std::string targetPath) {
 	}
 	regular_files++;
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest file)." << "\n";
-
+	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 
 	std::cout.rdbuf(backup);
