@@ -7,54 +7,67 @@
 #include <stdio.h>
 
 
+
 namespace fs = std::experimental::filesystem;
 
-void check_out(std::string copy_path, std::string source_path )
+void check_out(std::string s_path, std::string source_path, std::string label )
 {
 	time_t current_time = time(NULL);
 	char timeStr[26];
 	char cur_time = ctime_s(timeStr, sizeof timeStr, &current_time);
 	std::string label_name;
-
-	std::cout << "Enter a label name. If no label name, type 'N'" << std::endl;
-	std::cin >> label_name;
-
-	if (label_name == "N" || label_name == "n")
-	{
-		label_name == "manifest.txt";
-	}
-	
-	//Need 2 steps here: 
-	//1) Combine the source path and the original manifest name into a string, do the same with source path and label
-	//2) Convert both into const char * for the rename function 
 	std::string sp = source_path + "\\manifest.txt";
-	const char *sp2 = sp.c_str();
-	std::string label2 = source_path + "\\" + label_name;
-	std::cout << label2 << std::endl;
 	
-	if (source_path == copy_path)
+	if (source_path == s_path)
 	{
 		std::cout << "Error, copied path cannot be the same as destination folder." << std::endl;
 	}
 	else
 	{
-		fs::copy(copy_path, source_path, fs::copy_options::recursive);		
-
-		std::ofstream fileManifest(source_path);
-		const char * label = label2.c_str();
-		//std::cout << label << std::endl;
-		bool rename_success = rename(sp2, label);
-		if (rename_success == true)
+		fs::recursive_directory_iterator iter(s_path);
+		fs::recursive_directory_iterator end;
+		std::fstream file;
+		std::string line;
+		std::string c_label;
+		//iterates through the whole filesystem and looks for all manifest files
+		while (iter != end)
 		{
-			std::cout << "Sucessfully renamed file." << std::endl;
-		}
-		else
-			std::cout << "Error in renaming file." << std::endl;
-		
-		label_name.insert(0, "\\");
+			std::string p = iter->path().string();
+			//if a file is the manifest it will open it and check what the label says
+			if (p.substr(p.size() - 12, 12) == "manifest.txt")
+			{
+				std::ifstream f(p);
+				if (f.is_open() == false)
+				{
+					std::cout << "Failed to open file." << std::endl;
+				}
+				while (std::getline(f,line))
+				{
+					std::getline(f,line);
+					std::cout << line.substr(0,5) << std::endl;
+					//stores the line that says label
+					if (line.substr(0, 6) == "Label:")
+					{
+						c_label = line.substr(7, line.size() - 1);
+					}
+				}
+				f.close();
+				//if the labels match copy the file path to the folder
+				if (c_label == label)
+				{
+					fs::copy(iter->path().parent_path(), source_path, fs::copy_options::recursive);
+				}
+				
+			}
+			iter.operator++();
+		}	
+
+		//std::ofstream fileManifest(source_path);
+		//std::cout << label << std::endl;
+		//label_name.insert(0, "\\");
 		//const char * label2 = label_name.c_str();
-		fileManifest.open(label2, std::ofstream::trunc);
-		fileManifest << "File created at:" << timeStr;
+		//fileManifest.open(label2, std::ofstream::trunc);
+		//fileManifest << "File created at:" << timeStr;
 	
 		
 		std::cout << "Successfully copied file path." << std::endl;
