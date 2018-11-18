@@ -1,5 +1,5 @@
 CPSC 362 
-Project #1: VCS Create Repo
+Project #2: Check-out & and Check-In
 
 Team Name: JAH
 
@@ -9,30 +9,29 @@ Hasib Ziai
 
 Intro
 -----
-The goal of the project was to create a working repository system for our first version of the VCS.
-In concept, the first folder is used as the root folder whose purpose is to hold all subsequent 
-sub-folders and files. After the user specifies the root folder, a folder will be made for each 
-file in the root folder. These folders will be named after the name of the file. Inside those 
-folders will be the original version of the file as well as a folder to hold changes to the file.
-The folder that holds changes to the file will be named using a checksum algorithm. This algorithm
-takes the name and size of the file and renames the folder accordingly. Inside the renamed folder
-there will be the changed file with the same name as the folder. This process will repeat as long
-as changes are made to the file, regardless if it is an edited version or the original.
+The goal of the project was to implement 3 different functions: label, check-out, and check-in.
+Project #2 builds on the functionality of the first project, VCS Create Repo, but adds the three
+aforementioned functions. 
 
-First the user specifies the source folder and the path of the repo that they would like to copy.
-Then 3 vectors are created to sort the follow parameters: paths, filenames, and the artifact path.
-After a root folder is specified, the various folder and subfolder paths are stored in their
-respective vectors. Inside the artifact folders, the checksum algorithm is ran in order to
-rename the files inside the artifact folders. After the checksum value is created, the path,
-filename and checksum is stored inside the artifact vector. The process repeats until all the 
-folders/subfolders have been visited. Finally, another loop is initialized to cleanup the
-original, unnamed files (the original checksum files).
+The label function takes in two arguments: the file path to the manifest and the a specified label
+name. It will then ask the user if the manifest has been changed. If the user selects 'y', then the 
+user will be prompted to enter the name of the manifest they wish to change. Afterwards, it will 
+confirm if the user would like to change the manifest name. If the user selects 'n' then the name
+of the label will be printed inside the manifest. 
+
+The checkout function takes in two arguments: the file path to the folder being copied and the 
+file path to a folder the user would like to copy the folder to. Once the function is called, it
+asks the user if it would like to use the name of a label. If the user selects "N" or "n" it will
+use "manifest.txt" as the default name of the manifest. After that the function will copy the 
+contents of the first file path specified and will put an exact copy in the specified location.
+Afterwards it will rename the manifest if a label was given and will write the time and date at
+which the copy was created. 
 
 
 Contents
 --------
 The file included in the .zip submission will be the source file (source.cpp) and the header file 
-for the checksum(checksum.h).
+for the checksum(checksum.h). 
 
 
 External Requirements
@@ -48,44 +47,12 @@ A source folder needs to be already made in the target destination.
 
 Sample
 ------
-The source path entered was: mypt2
-The target path entered was: mypt2_repo2
-
-
-
-Size of the file is: 5
-Final string is: 4206-L5
-The relative path is: mypt2_repo2\hx.txt
-
-
-Size of the file is: 134
-Final string is: 83430-L134
-The relative path is: mypt2_repo2\manifest.txt
-
-
-Size of the file is: 8
-Final string is: 3993-L8
-The relative path is: mypt2_repo2\Stuff\goodbye.txt
-
-
-Size of the file is: 12
-Final string is: 8700-L12
-The relative path is: mypt2_repo2\Stuff\hello.txt
-
-
-There are 4 files in the repository (including the manifest.txt file).
-
 
 Features
 --------
-Checksum algorithm that takes in the file's contents and size and renames it based on the algorithm
-parameters.
+Functionality of the three functions are described in the intro.
 
-Additional folders will be made according to the name of the files.
 
 Bugs
 ----
-The ostream creates a manifest.txt but it is empty during the first iteration. 
-On 2nd pass to delete remnant text files, manifest.txt may be in different arrays
-of the path vector, which will then throw an error as the program cannot find the
-file at the specified path.
+
