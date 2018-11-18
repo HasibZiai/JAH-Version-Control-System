@@ -39,8 +39,7 @@ will be written into the manifest.txt inside the Target Repo, as well as the dat
 
 Contents
 --------
-The file included in the .zip submission will be the source file (source.cpp) and the header file 
-for the checksum(checksum.h). 
+The file included in the .zip submission will be the source file (source.cpp) and the header file(Repo.h) 
 
 
 External Requirements
