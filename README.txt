@@ -19,13 +19,12 @@ user will be prompted to enter the name of the manifest they wish to change. Aft
 confirm if the user would like to change the manifest name. If the user selects 'n' then the name
 of the label will be printed inside the manifest. 
 
-The checkout function takes in two arguments: the file path to the folder being copied and the 
-file path to a folder the user would like to copy the folder to. Once the function is called, it
-asks the user if it would like to use the name of a label. If the user selects "N" or "n" it will
-use "manifest.txt" as the default name of the manifest. After that the function will copy the 
-contents of the first file path specified and will put an exact copy in the specified location.
-Afterwards it will rename the manifest if a label was given and will write the time and date at
-which the copy was created. 
+The check-out function takes in 3 arguments: the source path, a folder path to copy to, and a label
+name. Check-out will iterate through all the files, folders, and subfolders and will check for a
+"manifest.txt". If it finds a manifest.txt then it will search the text file for the label. It will
+then check the label against the argument that is provided in the original function. If the two
+labels are the same then it will copy all the files in the parent path of the iterator into the new
+folder provided in the arguments. 
 
 
 Contents
