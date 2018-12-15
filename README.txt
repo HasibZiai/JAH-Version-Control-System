@@ -55,7 +55,6 @@ A source folder needs to be already made in the target destination.
 
 Sample
 ------
-
 Create Repo
 Sat Nov 17 22:24:14 2018
 
@@ -99,15 +98,28 @@ There are 7 files in the repository (including the manifest file).
 
 Label: TestLabel
 
+
+
 Check In
-Sat Nov 17 22:27:37 2018
+Fri Dec 14 23:49:54 2018
 
 The source path entered was: C:\sandbox\test3
 The target path entered was: C:\sandbox\test2
 
 
 
-There are 8 files in the repository (including the manifest file).
+Size of the file is: 38 bytes.
+Final string is: 19193-L38
+The relative path of the checked-in file is: C:\sandbox\test2\subfolder1\testdoc2\19193-L38.txt
+
+
+Size of the file is: 33 bytes.
+Final string is: 11617-L33
+The relative path of the checked-in file is: C:\sandbox\test2\testdoc\11617-L33.txt
+
+
+There are 2 new files checked-in to the repository.
+There are 9 files in the repository (including the manifest file).
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
@@ -119,6 +131,4 @@ Descriptions and functionality for each feature is described above.
 
 Bugs
 ----
-Check-In does not currently work. While it is able to detect when files are the same and increments
-the file count, it does not detect when the filenames are different, and as a result, cannot copy the new file into 
-the Target Repo. 
+Check-In will not work if the files you want to copy from your Source Repo are already in the Target Repo, and will show incorrect counts for files. It does not overwrite any files, so only the file counts are affected.
