@@ -1,5 +1,5 @@
 /*
-	Computer Science 362 - SWE Fundamentals - VCS Project #1
+	Computer Science 362 - SWE Fundamentals - VCS Project #3
 	Team Name: JAH
 	Authors :
 		Aaron Gumabong - aarongumabong@gmail.com
@@ -11,8 +11,6 @@
 					along with the target path; the directory where the repository will be created. This program assumes all of the project guideline assumptions, but 
 					we have created some directory exist checks for sanity. 
 */
-
-
 #include <iostream>
 #include <experimental/filesystem>
 #include <fstream>
@@ -23,10 +21,14 @@
 
 #include "checksum.h"
 #include "Label.h"
+#include "checkout.h"
+#include "merge.h"
 
 namespace fs = std::experimental::filesystem;
 
-
+	// create_repo has two paramters: 
+	// 1. Source path of project folder you want to create a repo of
+	// 2. Target path of newly created repo
 void create_repo(std::string sourcePath, std::string targetPath)
 {
 
@@ -34,11 +36,6 @@ void create_repo(std::string sourcePath, std::string targetPath)
 	//array to take in the system time and date
 	char timeStr[26];
 	char cur_time = ctime_s(timeStr, sizeof timeStr, &current_time);
-
-
-	// In this example we have two text files in a folder "mypt" within the source folder.
-	// This code will copy contents of "mypt" to target folder "mypt_repo".
-
 	int regular_files = 0;
 	int n = 0;
 	// Main code for copying files and directories along with all related subdirectories
@@ -70,13 +67,10 @@ void create_repo(std::string sourcePath, std::string targetPath)
 	psbuf = fileManifest.rdbuf();
 	std::cout.rdbuf(psbuf);
 
-
 	targetPath = targetPath.substr(0, targetPath.size() - 13);
-
 
 	fileManifest << "The source path entered was: " << sourcePath << "\n";
 	fileManifest << "The target path entered was: " << targetPath << "\n\n\n\n";
-
 
 	// For loop that recursively iterates through all folders/sub-folders searching for files
 	try {
@@ -146,25 +140,29 @@ void create_repo(std::string sourcePath, std::string targetPath)
 			{
 				std::cout << p.what() << "\n";
 			}
-			
 		}
 
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest.txt file)." << "\n";
 	std::cout.rdbuf(backup);
-
 	// Printout out the timestamp
 	std::cout << timeStr;
-
 	std::cout << "The operation is complete. Please check manifest file.\n";
-
 }
 
 
 
 int main() {
 
-	label("mypt2_repo", "Fred");
-	//create_repo("mypt2", "mypt2_repo");
+	//label("mypt2_repo", "Fred");
+	//create_repo("mypt2", "mypt3_repo");
+	//check_out("mypt2_repo", "mypt2_checkout", "Fred");
+
+	//	Three parameters:
+	//	1. Path of T project
+	//	2. Path of R project
+	//	3. Path of G project
+	//	Only testing for T project right now
+	merge("mypt2_checkout", "a", "b");
 	
 	return 0;
 }
