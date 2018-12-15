@@ -11,7 +11,8 @@
 			of the original files to be output to Artifacts.
 
 */
-
+#ifndef _CHECKSUM_
+#define _CHECKSUM_
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -91,3 +92,4 @@ std::string text_content(fs::path file_path)
 
 	return content;
 }
+#endif

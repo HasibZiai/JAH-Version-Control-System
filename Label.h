@@ -1,7 +1,11 @@
+#ifndef _LABEL_
+#define _LABEL_
 #include <iostream>
 #include <fstream>
 #include <experimental/filesystem>
 #include <stdio.h>
+
+//	Two parameters: Path of manifest file and desired label name.
 
 void label(std::string manifest_path, std::string label_name) {
 
@@ -18,7 +22,7 @@ void label(std::string manifest_path, std::string label_name) {
 		std::getline(std::cin, new_name);
 		_manifest_path = manifest_path + "\\" + new_name + ".txt";
 	}
-
+	// Option to change filename or append text file with given label name
 	std::cout << "Change filename? <y/n> \n";
 	std::cin >> f;
 	if (f == 'y') {
@@ -36,3 +40,4 @@ void label(std::string manifest_path, std::string label_name) {
 	}
 	system("pause");
 }
+#endif
