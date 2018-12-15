@@ -317,7 +317,7 @@ void check_out(std::string s_path, std::string source_path, std::string label)
 
 
 
-//check_in is currently not functional, see comments in function below
+
 
 void check_in(std::string sourcePath, std::string targetPath) {
 
