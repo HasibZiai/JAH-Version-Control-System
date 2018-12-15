@@ -1,7 +1,7 @@
-#include <iostream>
+#ifndef _PROJECT_
+#define _PROJECT_
 #include <fstream>
 #include <experimental/filesystem>
-#include <stdio.h>
 
 namespace fs = std::experimental::filesystem;
 
@@ -20,3 +20,4 @@ private:
 	int num_files;
 };
 
+#endif

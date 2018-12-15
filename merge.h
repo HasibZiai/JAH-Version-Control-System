@@ -1,3 +1,5 @@
+#ifndef _MERGE_
+#define _MERGE_
 #include <iostream>
 #include <fstream>
 #include <experimental/filesystem>
@@ -15,3 +17,4 @@ void merge(std::string T_path, std::string R_path, std::string G_path) {
 	T.find_files(T_path);
 
 }
+#endif
