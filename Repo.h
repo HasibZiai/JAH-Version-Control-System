@@ -328,6 +328,7 @@ void check_in(std::string sourcePath, std::string targetPath) {
 
 
 	int regular_files = 0;
+	int new_files = 0;
 	int n = 0;
 
 	// Holds copies of the above files and subdirectories
@@ -369,20 +370,18 @@ void check_in(std::string sourcePath, std::string targetPath) {
 
 	// For loop that recursively iterates through all folders/sub-folders searching for files
 	try {
-		for (auto& p : fs::recursive_directory_iterator(targetPath))
+		for (auto& targetFile : fs::recursive_directory_iterator(targetPath))
 
 			// For every file that is a regular file...
-			if (fs::is_regular_file(p))
+			if (fs::is_regular_file(targetFile))
 			{
 				//std::cout << "Is the target file a regular file?\n";
 				for (auto& sourceFile : fs::recursive_directory_iterator(sourcePath)) {
 					if (fs::is_regular_file(sourceFile)) {
-						//std::cout << "Is sourceFile a regular file?\n";
-						//std::cout << "Parent path: " << fs::path(p).parent_path() << "\n";
-						//std::cout << "Relative path: " << fs::path(p).relative_path() << "\n";
+						
 
 						//Check if current directory in Target is the same as current directory in Source
-						std::string targetParentDir = fs::path(p).parent_path().string();
+						std::string targetParentDir = fs::path(targetFile).parent_path().string();
 						std::string sourceParentDir = fs::path(sourceFile).parent_path().string();
 
 						//Get Parent Directory by removing Target Path
@@ -399,104 +398,58 @@ void check_in(std::string sourcePath, std::string targetPath) {
 
 						if (targetParentDir == sourceParentDir) {
 							
-							//Comments below are for debugging purposes only
+							
 
-							//std::cout << "Is the parent path of target the same as source?\n";
-							//std::cout << "Target Parent directory: " << targetParentDir << "\n";
-							//std::cout << "Source parent directory: " << sourceParentDir << "\n";
+							if (fs::is_regular_file(sourceFile) && fs::is_regular_file(targetFile)) {
+								if (fs::path(targetFile).filename() == fs::path(sourceFile).filename() && fs::path(targetFile).filename().string() != "manifest.txt") {
 
+									//If filenames are same, increment regular files
+									regular_files++;
+								}
+								if (fs::path(targetFile).filename() != fs::path(sourceFile).filename()) {
 
-							for (auto& q : fs::directory_iterator(fs::path(p).parent_path())) {
-								for (auto& r : fs::directory_iterator(fs::path(sourceFile).parent_path())) {
+									// Increment counter for # of files within repo
+									regular_files++;
 
-									//Comments below are for debugging purposes only
+									// calculate new Checksum Value
+									checksum_value = checksum(fs::path(sourceFile));
 
-									//std::cout << "Current relative path of target: " << fs::path(q).parent_path() << "\n";
-									//std::cout << "Current relative path of source: " << fs::path(r).parent_path() << "\n";
+									std::string copySource = fs::absolute(sourceFile).string();
+									std::string copyTarget = fs::path(targetFile).parent_path().string();
+									
+									//Copy new file to target Repo directory
+									try {
+										fs::copy(copySource, copyTarget);
+										//std::cout << "File copied successfully\n";
+									}
+									catch (std::exception & e) {
+										std::cout << e.what() << "\n";
+									}
+									
+									
+									std::string newFileDir = fs::path(targetFile).parent_path().string();
+									std::string newFileName = newFileDir + "\\" + checksum_value + ".txt";
+									
+									//Iterator finds new file and renames it with Checksum name
+									for (auto& newFile : fs::directory_iterator(newFileDir)) {
+										if (fs::path(newFile).filename() == fs::path(sourceFile).filename()) {
+											//std::string newRelativePath = fs::path(newFile).relative_path().string();
+											std::string tempFilePath = fs::absolute(newFile).string();
+											//std::cout << "new Temp File Path: " << tempFilePath << "\n";
 
-									//If both files are regular files...
-									if (fs::is_regular_file(q) && fs::is_regular_file(r)) {
-
-										//If both filenames are the same, and not equal to "manifest.txt"...
-										if (fs::path(q).filename() == fs::path(r).filename() && fs::path(q).filename().string() != "manifest.txt") {
+											fs::rename(tempFilePath, newFileName);
+											//std::cout << "GRRRRRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEAAAT!!!!!!!!!!\n";
+											std::cout << "The path of the checked-in file is: " << fs::path(newFile).parent_path().string() + "\\" + checksum_value + ".txt" << "\n\n\n";
 											
-											//Comments are for debugging purposes only
-											
-											//std::cout << "Are the file names the same?\n";
-											//std::cout << "Target filename: " << fs::path(p).filename() << "\n";
-											//std::cout << "Source filename: " << fs::path(sourceFile).filename() << "\n";
-											
-											//Incrementing the iterator does not seem to work using the current implementation.
-											//q& operator++();						Does not work
-											//directory_iterator& operator++();		Does not work
-											//q& increment(std::error_code& ec);	Does not work
-											//directory_iterator& operator++();		Does not work
-
-											//increment matching files, do not copy or overwrite in Source repo
-											regular_files++;
-											goto cnt;
-
-										}
-									cnt:;
-										//If filenames are not equal inside the directory...
-										if (fs::path(q).filename() != fs::path(r).filename()) {
-											
-											//Comments are for debugging purposes only
-
-											//std::cout << "Are the file names different?\n";
-											//std::cout << "Target filename: " << fs::path(q).filename() << "\n";
-											//std::cout << "Source filename: " << fs::path(r).filename() << "\n";
-
-
-
-											//If files in directories are named differently, then copy files from source Repo to target Repo and apply operations
-											
-											//This part is currently nonfunctional due to iterator not being able to be incremented
-											//This would copy over the file pointed to by sourceFile
-
-											/*
-											// Increment counter for # of files within repo
-											regular_files++;
-
-											// Created vector paths to store paths to regular files into
-											paths.push_back(fs::path(sourceFile).parent_path());
-
-											// Created vector filenames without extension to hold names of files within subfolders for Checksum calculation
-											filenames.push_back(fs::path(sourceFile).stem());
-
-											// Created vector that contains the name of the file being copied along with its extension
-											full_filename.push_back(fs::path(sourceFile).filename());
-
-											// Create directories and subdirectories
-											fs::create_directories(paths[n] / filenames[n]);
-
-											// Iterate through folders and find the checksum values of all text files found
-											checksum_value = checksum(fs::path(sourceFile));
-
-											// Push all artifact directories that will be created into a vector
-											artifact_path.push_back(paths[n] / filenames[n] / checksum_value += ".txt");
-
-											// Create new text files using artifact directories found above by iteration
-											std::ofstream outfile(artifact_path[n]);
-
-											// Writing the contents of the original files to the Artifact files
-											outfile << text_content(fs::path(sourceFile));
-
-											std::cout << "The relative path is: " << fs::path(sourceFile).relative_path() << "\n\n\n";
-
-											// Close ofstream to prevent memory leak
-											outfile.close();
-											n++;
-											*/
-										}
-										else {
-											//For debugging purposes only
-											//std::cout << "Error, neither true nor false\n";
+											//Increment new file counter
+											new_files++;
 										}
 									}
-
+									
 								}
+
 							}
+							
 
 						}
 
@@ -534,6 +487,8 @@ void check_in(std::string sourcePath, std::string targetPath) {
 		}
 
 	}
+	std::cout << "There are " << new_files << " new files checked-in to the repository." << "\n";
+
 	regular_files++;
 	std::cout << "There are " << regular_files << " files in the repository (including the manifest file)." << "\n";
 	std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
